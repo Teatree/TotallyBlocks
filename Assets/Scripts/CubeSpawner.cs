@@ -8,7 +8,7 @@ public class CubeSpawner : MonoBehaviour
 
     public static Dictionary<int, GameObject> cubeLineByIndex = new Dictionary<int, GameObject>();
     int globalIndexLast = 0;
-    static int firstIndexAlive = 0;
+    public static int firstIndexAlive = 0;
 
     public void Start()
     {

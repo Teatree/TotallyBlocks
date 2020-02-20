@@ -93,6 +93,7 @@ public class PlayerController : MonoBehaviour {
     {
         Debug.Log("RemoveLine");
         GameManager.Instance.IncreaseSpeed();
+        GameManager.Instance.MoveCubeLine();
 
         if (_temp.rightObj != null)
         {
@@ -103,22 +104,16 @@ public class PlayerController : MonoBehaviour {
                 Rigidbody r = t.GetComponent<Rigidbody>();
                 r.AddForce(Vector3.up * 200, ForceMode.Force);
                 r.AddForce(Vector3.forward * 800, ForceMode.Force);
-            }
-        }
-        
-        CubeSpawner.removeFirstLine();
 
-        killedLines++;
+            }
+
+            CubeSpawner.removeFirstLine();
+            killedLines++;
+            transform.GetChild(0).GetComponent<TextMesh>().text = "" + killedLines;
+        }
+
         //Debug.LogError("you killed the line! space " + killedLines); 
         PickRandomColour();
-    }
-
-    private IEnumerator LineRemove()
-    {
-        yield return new WaitForSeconds(2f);
-        CubeSpawner.removeFirstLine();
-       
-        yield return null;
     }
 
     void PickRandomColour()

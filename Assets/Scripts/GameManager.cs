@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     public float enemyCubeSpeed;
     public float playerCubeSpeed;
     public float increment; // decrease increment over time
+    public float lineMoveSpeedMin;
+    public float lineMoveSpeedMax;
+    float _lineMoveSpeed;
 
     public GameState gameState;
     //int colorTick;
@@ -70,6 +73,26 @@ public class GameManager : MonoBehaviour
            // mat = materials[materialIndex];
         //}
         return mat;
+    }
+
+    public void MoveCubeLine()
+    {
+        if (CubeSpawner.cubeLineByIndex[CubeSpawner.firstIndexAlive].transform.position.z > 3.5f)
+        {
+            _lineMoveSpeed = lineMoveSpeedMax;
+        }
+        else
+        {
+            _lineMoveSpeed = lineMoveSpeedMin;
+        }
+
+        foreach(int k in CubeSpawner.cubeLineByIndex.Keys)
+        {
+            Vector3 pos = CubeSpawner.cubeLineByIndex[k].transform.position;
+            pos = new Vector3(pos.x, pos.y, pos.z - _lineMoveSpeed);
+
+            CubeSpawner.cubeLineByIndex[k].transform.position = pos;
+        }
     }
 
     public void Lose()
