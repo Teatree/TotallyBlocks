@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class GameManager : MonoBehaviour
     int materialIndex;
     int tick = 0;
 
-    private void Awake()
+    private void Start()
     {
         gameState = GameState.Active;
 
@@ -49,6 +50,12 @@ public class GameManager : MonoBehaviour
             cubeSpawner.SpawnLine();
             tick = 0;
         }
+    }
+
+    public void RestartGame()
+    {
+        Debug.Log("RESTARTED");
+        SceneManager.LoadScene(0);
     }
 
     public Material PickRandomColour()
@@ -99,6 +106,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("You lose!");
         gameState = GameState.Lost;
+        UIManager.Instance.ShowRestartUI();
     }
 
     public enum GameState{

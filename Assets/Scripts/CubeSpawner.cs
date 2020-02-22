@@ -12,6 +12,8 @@ public class CubeSpawner : MonoBehaviour
 
     public void Start()
     {
+        firstIndexAlive = 0;
+        cubeLineByIndex = new Dictionary<int, GameObject>();
         for (int i = 0; i <= 20; i++)
         {
             globalIndexLast = i;

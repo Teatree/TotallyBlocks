@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
@@ -10,8 +11,19 @@ public class PlayerController : MonoBehaviour {
 
     public int coolDownCounter;
     public int coolDownTime;
+    
+    public float feedbackTrickleValue;
+    public float feedbackEatValue;
+    public List<string> feedbackWords;
+    float currentFeedbackVal;
+
+    public Text scoreText;
+    public Text m_Text;
+
+    float[] playerPoses = { -2.1f, -1.05f, 0, 1.05f, 2.1f }; 
 
     FrontTargetGameObject _temp;
+    Vector3 clickPos = new Vector3();
 
     int colorTick;
 
@@ -24,6 +36,7 @@ public class PlayerController : MonoBehaviour {
 
     private void Start()
     {
+        currentFeedbackVal = 0f;
         transform.GetComponent<MeshRenderer>().material = GameManager.Instance.PickRandomColour();
 
         playerState = PlayerState.Passive;
@@ -38,6 +51,23 @@ public class PlayerController : MonoBehaviour {
         LoseCheck();
         MovePlayer();
         StateUpdate();
+        MoveControls();
+
+        FeedbackTrickleDown();
+
+        //if (posX > -2 && diff < 0.1f)
+        //{
+        //    posX -= GameManager.Instance.playerCubeSpeed / 100;
+        //    transform.position = new Vector3(posX, transform.position.y, transform.position.z);
+        //}
+
+        //if (posX < 2 && diff > 0.1f)
+        //{
+        //    posX += GameManager.Instance.playerCubeSpeed/100;
+        //    transform.position = new Vector3(posX, transform.position.y, transform.position.z);
+        //}
+
+        //Update the Text on the screen depending on current position of the touch each frame
 
         FrontTargetGameObject cubes = CubesInFront();
 
@@ -60,7 +90,6 @@ public class PlayerController : MonoBehaviour {
                 playerState = PlayerState.Pushing;
 
                 _temp = cubes;
-
                 
                 //cubes.rightObj.GetComponent<Collider>().enabled = false;
             }
@@ -69,6 +98,27 @@ public class PlayerController : MonoBehaviour {
                 playerState = PlayerState.Passive;
             }
         }
+    }
+
+    private void FeedbackTrickleDown()
+    {
+        if(currentFeedbackVal>0)
+            currentFeedbackVal -= feedbackTrickleValue;
+
+        UIManager.Instance.UpdateFeedbackSliderUI(currentFeedbackVal);
+    }
+
+    private void AddFeedbackVal(float val)
+    {
+        currentFeedbackVal += val;
+
+        if(currentFeedbackVal >= 1)
+        {
+            currentFeedbackVal = 0;
+            UIManager.Instance.DisplayFeedbackMessage(feedbackWords[Random.Range(0, feedbackWords.Count)]);
+        }
+
+        UIManager.Instance.UpdateFeedbackSliderUI(currentFeedbackVal);
     }
 
     private IEnumerator Blink()
@@ -109,11 +159,80 @@ public class PlayerController : MonoBehaviour {
 
             CubeSpawner.removeFirstLine();
             killedLines++;
-            transform.GetChild(0).GetComponent<TextMesh>().text = "" + killedLines;
+            AddFeedbackVal(feedbackEatValue);
+            scoreText.text = "" + killedLines;
         }
 
         //Debug.LogError("you killed the line! space " + killedLines); 
         PickRandomColour();
+    }
+
+    void MoveControls()
+    {
+        if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
+        {
+            if (Input.touchCount > 0)
+            {
+                Vector3 touch = Input.mousePosition;
+
+                if (Input.GetTouch(0).phase == TouchPhase.Began)
+                {
+                    clickPos = Input.GetTouch(0).position;
+                }
+                if (Input.GetTouch(0).phase == TouchPhase.Moved)
+                {
+                    float per = touch.x / Screen.width * 200;
+                    float perC = clickPos.x / Screen.width * 200;
+                    float diff = per - perC;
+                    m_Text.text = "x : " + diff + "%";
+
+                    float posX = transform.position.x;
+                    if (diff > 50)
+                        posX = playerPoses[4];
+                    if (diff > 10 && diff < 50)
+                        posX = playerPoses[3];
+                    if (diff > -10 && diff < 10)
+                        posX = playerPoses[2];
+                    if (diff > -50 && diff < -10)
+                        posX = playerPoses[1];
+                    if (diff < -50)
+                        posX = playerPoses[0];
+
+                    transform.position = new Vector3(posX, transform.position.y, transform.position.z);
+                }
+            }
+        }
+        else
+        {
+            Vector3 mouse = Input.mousePosition;
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                clickPos = Input.mousePosition;
+            }
+
+            if (Input.GetMouseButton(0))
+            {
+                float per = mouse.x / Screen.width * 200;
+                float perC = clickPos.x / Screen.width * 200;
+                float diff = per - perC;
+                m_Text.text = "x : " + diff + "%";
+
+                float posX = transform.position.x;
+                if (diff > 50)
+                    posX = playerPoses[4];
+                if (diff > 10 && diff < 50)
+                    posX = playerPoses[3];
+                if (diff > -10 && diff < 10)
+                    posX = playerPoses[2];
+                if (diff > -50 && diff < -10)
+                    posX = playerPoses[1];
+                if (diff < -50)
+                    posX = playerPoses[0];
+
+                transform.position = new Vector3(posX, transform.position.y, transform.position.z);
+            }
+        }
     }
 
     void PickRandomColour()
@@ -154,13 +273,13 @@ public class PlayerController : MonoBehaviour {
     {
         if (playerState == PlayerState.Pushing) 
         {
-            Debug.Log("pushing");
+            //Debug.Log("pushing");
             coolDownCounter++;
         }
 
         if(playerState == PlayerState.Passive)
         {
-            Debug.Log("passive");
+            //Debug.Log("passive");
             coolDownCounter = 0;
         }
 
