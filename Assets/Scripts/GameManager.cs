@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SceneSingleton<GameManager>
 {
-    public static GameManager _instance;
-
-    public static GameManager Instance { get { return _instance; } }
-
     public CubeSpawner cubeSpawner;
     public List<Material> materials;
     public float enemyCubeSpeed;
@@ -29,15 +25,6 @@ public class GameManager : MonoBehaviour
 
         //colorTick = 0;
         materialIndex = Random.Range(0, 5);
-
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            _instance = this;
-        }
     }
 
     public void GameManage()

@@ -47,9 +47,7 @@ public class PlayerController : MonoBehaviour {
         if (GameManager.Instance.gameState != GameManager.GameState.Active)
             return;
 
-        ButtonDetector();
         LoseCheck();
-        MovePlayer();
         StateUpdate();
         MoveControls();
 
@@ -252,23 +250,6 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void MovePlayer()
-    {
-        float posX = transform.position.x;
-        if (Input.GetButtonDown("LEFT"))
-        {
-            if (posX > -2)
-                posX -= GameManager.Instance.playerCubeSpeed;
-            transform.position = new Vector3(posX, transform.position.y, transform.position.z);
-        }
-        if (Input.GetButtonDown("RIGHT"))
-        {
-            if(posX < 2)
-                posX += GameManager.Instance.playerCubeSpeed;
-            transform.position = new Vector3(posX, transform.position.y, transform.position.z);
-        }
-    }
-
     void StateUpdate()
     {
         if (playerState == PlayerState.Pushing) 
@@ -287,16 +268,6 @@ public class PlayerController : MonoBehaviour {
         {
             RemoveLine();
         }
-    }
-
-    void ButtonDetector()
-    {
-        if (Input.GetButtonDown("ENTER"))
-        {
-            Debug.Log("Enter");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-
     }
 
     void LoseCheck()
