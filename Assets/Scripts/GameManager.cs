@@ -21,7 +21,7 @@ public class GameManager : SceneSingleton<GameManager>
 
     private void Start()
     {
-        gameState = GameState.Active;
+        gameState = GameState.Paused;
 
         //colorTick = 0;
         materialIndex = Random.Range(0, 5);
@@ -30,6 +30,9 @@ public class GameManager : SceneSingleton<GameManager>
     public void GameManage()
     {
         // Spawning of Cubes
+        if (gameState != GameState.Active)
+            return;
+
         tick++;
 
         if (tick > 20)
@@ -42,6 +45,7 @@ public class GameManager : SceneSingleton<GameManager>
     public void RestartGame()
     {
         Debug.Log("RESTARTED");
+        DataController.SavePlayer(PlayerController.playerData);
         SceneManager.LoadScene(0);
     }
 
@@ -85,15 +89,16 @@ public class GameManager : SceneSingleton<GameManager>
             Vector3 pos = CubeSpawner.cubeLineByIndex[k].transform.position;
             pos = new Vector3(pos.x, pos.y, pos.z - _lineMoveSpeed);
 
-            CubeSpawner.cubeLineByIndex[k].transform.position = pos;
+            CubeSpawner.cubeLineByIndex[k].transform.position = Vector3.MoveTowards(CubeSpawner.cubeLineByIndex[k].transform.position, pos, 0.05f);
         }
     }
 
-    public void Lose()
+    public void Lose(int score)
     {
         Debug.Log("You lose!");
         gameState = GameState.Lost;
         UIManager.Instance.ShowRestartUI();
+        UIManager.Instance.SetRestartScoreValues(score, PlayerController.playerData.highestScore);
     }
 
     public enum GameState{

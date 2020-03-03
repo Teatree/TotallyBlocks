@@ -8,7 +8,7 @@ public class UnityAdsController : SceneSingleton<UnityAdsController> {
 
     public static bool AdsLoaded;
 
-    //intersticials
+    //intersticials 
     private string intersticialVideo = "video";
 
     void Start()

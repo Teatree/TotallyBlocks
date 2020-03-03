@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class PlayerController : MonoBehaviour {
+
+    public static DataController.PlayerData playerData;
 
     public PlayerState playerState;
     public GameObject cubeReplace;
@@ -31,6 +34,8 @@ public class PlayerController : MonoBehaviour {
 
     public void Awake()
     {
+        playerData = DataController.LoadPlayer();
+
         colorTick = 0;
     }
 
@@ -69,19 +74,16 @@ public class PlayerController : MonoBehaviour {
 
         FrontTargetGameObject cubes = CubesInFront();
 
-        if (cubes.leftObj != null)
+        if (cubes.leftObj != null || cubes.rightObj != null)
         {
-            transform.position = new Vector3(transform.position.x, transform.position.y, cubes.leftObj.transform.position.z - 1.05f);
-        }
-        if (cubes.rightObj != null)
-        {
-            transform.position = new Vector3(transform.position.x, transform.position.y, cubes.rightObj.transform.position.z - 1.05f);
+            //transform.position = new Vector3(transform.position.x, transform.position.y, cubes.leftObj.transform.position.z - 1.05f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(transform.position.x, transform.position.y, cubes.leftObj.transform.position.z - 1.05f), 0.1f);
         }
 
         if (cubes.rightObj != null && cubes.leftObj != null)
         {
-            if (cubes.leftObj.transform.GetComponent<MeshRenderer>().material.name == transform.GetComponent<MeshRenderer>().material.name
-                && cubes.rightObj.transform.GetComponent<MeshRenderer>().material.name == transform.GetComponent<MeshRenderer>().material.name)
+            if (cubes.leftObj.transform.GetChild(0).transform.GetComponent<MeshRenderer>().material.name == transform.GetComponent<MeshRenderer>().material.name
+                && cubes.rightObj.transform.GetChild(0).transform.GetComponent<MeshRenderer>().material.name == transform.GetComponent<MeshRenderer>().material.name)
             {
                 Debug.Log("It's my brother!");
                 
@@ -113,7 +115,7 @@ public class PlayerController : MonoBehaviour {
         if(currentFeedbackVal >= 1)
         {
             currentFeedbackVal = 0;
-            UIManager.Instance.DisplayFeedbackMessage(feedbackWords[Random.Range(0, feedbackWords.Count)]);
+            UIManager.Instance.DisplayFeedbackMessage(feedbackWords[UnityEngine.Random.Range(0, feedbackWords.Count)]);
         }
 
         UIManager.Instance.UpdateFeedbackSliderUI(currentFeedbackVal);
@@ -148,7 +150,7 @@ public class PlayerController : MonoBehaviour {
             GameObject c = Instantiate(cubeReplace, _temp.rightObj.transform.position, _temp.rightObj.transform.rotation);
             foreach (Transform t in c.transform)
             {
-                t.GetComponent<MeshRenderer>().material = _temp.rightObj.GetComponent<MeshRenderer>().material;
+                t.GetComponent<MeshRenderer>().material = _temp.rightObj.transform.GetChild(0).GetComponent<MeshRenderer>().material;
                 Rigidbody r = t.GetComponent<Rigidbody>();
                 r.AddForce(Vector3.up * 200, ForceMode.Force);
                 r.AddForce(Vector3.forward * 800, ForceMode.Force);
@@ -280,12 +282,21 @@ public class PlayerController : MonoBehaviour {
         {
             Debug.DrawRay(loseRayPos, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
             hit.transform.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-            GameManager.Instance.Lose();
+
+            SetHighScore();
+            GameManager.Instance.Lose(killedLines);
+
+            transform.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
         }
         else
         {
             Debug.DrawRay(loseRayPos, transform.TransformDirection(Vector3.down) * 4, Color.white);
         }
+    }
+
+    public void SetHighScore()
+    {
+        playerData.highestScore = playerData.highestScore < killedLines ? killedLines : playerData.highestScore;
     }
 
     FrontTargetGameObject CubesInFront()
@@ -331,5 +342,10 @@ public class PlayerController : MonoBehaviour {
     private class FrontTargetGameObject {
         public GameObject leftObj;
         public GameObject rightObj;
+    }
+
+    public static string GenerateID()
+    {
+        return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("Player" + UnityEngine.Random.Range(0, 100000000) + DateTime.Now));
     }
 }

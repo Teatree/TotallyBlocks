@@ -43,7 +43,7 @@ public class CubeSpawner : MonoBehaviour
             }
             existingCols.Add(materialNumber);
 
-            GameObject cube = line.transform.GetChild(i).gameObject;
+            GameObject cube = line.transform.GetChild(i).GetChild(0).gameObject;
             cube.GetComponent<MeshRenderer>().material = GameManager.Instance.materials[materialNumber];
             
             res.Add(cube);
@@ -67,7 +67,7 @@ public class CubeSpawner : MonoBehaviour
             }
             existingCols.Add(materialNumber);
 
-            GameObject cube = line.transform.GetChild(i).gameObject;
+            GameObject cube = line.transform.GetChild(i).GetChild(0).gameObject;
             cube.GetComponent<MeshRenderer>().material = GameManager.Instance.materials[materialNumber];
         }
 
